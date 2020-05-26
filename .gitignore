@@ -2,5 +2,5 @@ local.log
 main_proto.py
 remove.py
 sub.py
-test-adm.py
+test_adm.py
 translator.py
