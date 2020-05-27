@@ -34,3 +34,5 @@ def start_temperature_check():
                 
 
                 time.sleep(1)
+                
+start_temperature_check()

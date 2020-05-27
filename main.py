@@ -12,7 +12,7 @@ import customizer
 import threading
 import time
 import sys
-import temp_monitor
+# import temp_monitor
 
 
 Logger.set_codename('toast')
@@ -96,7 +96,7 @@ class customizationThread(threading.Thread):
     
 
 if __name__ == "__main__":
-    temp_monitor.start_temperature_check()
+    # temp_monitor.start_temperature_check()
     logger.info("Starting to listen for devices...")
     listener = AndroidAgentDeviceListener()
     adm = adm.AndroidDeviceMonitor()

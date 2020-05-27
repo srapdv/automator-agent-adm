@@ -27,26 +27,37 @@ def customizeTo(buyer_code, device_serial):
     command = "service call iphonesubinfo 1 | awk -F \"'\" '{print $2}' | " \
         "sed '1 d' | tr -d '.' | awk '{print}' ORS="
     
-    logger.info("Opening up device...")
+    logger.info("Opening up device {}...".format(device_serial))
     time.sleep(2)     
     if device.screen == "off":
         device.screen.on()
         logger.info("Turn the screen on")
     if device.screen == "on":
-        device.press.back()
-        time.sleep(1)
-        device.swipe(600, 1000, 600, 100, 5)
-        logger.info("Screen swiped (600, 800) > (600, 200)")
         while device(textContains="ok".upper()) or \
         device(textContains="allow".upper()):
-            if device(textContains="ok".upper()):
+            try:
                 logger.info("Found a dismissable OK dialog")
-                device.click(300, 200)
-                logger.info("Tapped OK")
-            elif device(textContains="Allow"):
-                logger.info("Found a dismissable allow dialog")
-                device.click(300, 200)
-                logger.info("Tapped allow")
+                device.press.home()
+                logger.info("Tapped home")
+                logger.info("Found a dismissable OK dialog")
+                device.press("back")
+                logger.info("Tapped back")
+            except:
+                pass
+        device.swipe(800, 1000, 700, 100, 5)
+        logger.info("Screen swiped (800, 1500) > (700, 100)")
+        while device(textContains="ok".upper()) or \
+        device(textContains="allow".upper()):
+            try:
+                logger.info("Found a dismissable OK dialog")
+                device.press.home()
+                logger.info("Tapped home")
+                logger.info("Found a dismissable OK dialog")
+                device.press("back")
+                logger.info("Tapped back")
+            except:
+                pass
+                
     try:
         time.sleep(2)
         logger.debug("Getting device IMEI...")
