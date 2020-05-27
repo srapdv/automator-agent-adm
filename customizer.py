@@ -20,11 +20,33 @@ def customizeTo(buyer_code, device_serial):
 
     logger.debug("Setting uiautomator device with {}".format(device_serial))
     print("Customizing " + str(device_serial))
+
     device = Device(device_serial)
+    logger.info("Device {} set".format(device_serial))
 
     command = "service call iphonesubinfo 1 | awk -F \"'\" '{print $2}' | " \
         "sed '1 d' | tr -d '.' | awk '{print}' ORS="
     
+    logger.info("Opening up device...")
+    time.sleep(2)     
+    if device.screen == "off":
+        device.screen.on()
+        logger.info("Turn the screen on")
+    if device.screen == "on":
+        device.press.back()
+        time.sleep(1)
+        device.swipe(600, 1000, 600, 100, 5)
+        logger.info("Screen swiped (600, 800) > (600, 200)")
+        while device(textContains="ok".upper()) or \
+        device(textContains="allow".upper()):
+            if device(textContains="ok".upper()):
+                logger.info("Found a dismissable OK dialog")
+                device.click(300, 200)
+                logger.info("Tapped OK")
+            elif device(textContains="Allow"):
+                logger.info("Found a dismissable allow dialog")
+                device.click(300, 200)
+                logger.info("Tapped allow")
     try:
         time.sleep(2)
         logger.debug("Getting device IMEI...")
@@ -67,7 +89,7 @@ def customizeTo(buyer_code, device_serial):
         result = {"imei": imei, "result": "Pass"}
         end_cust = time.perf_counter()
         duration = end_cust - start_cust
-        logger.debug("[Pass] {} customization ended in {}s"
+        logger.info("[Pass] {} customization ended in {}s"
             .format(imei, round(duration, 2)))
         print("[Pass] {} -- {}s".format(imei, round(duration, 2)))
         return result
@@ -82,7 +104,27 @@ def customizeTo(buyer_code, device_serial):
         print("[Fail] {} -- {}s".format(imei, round(duration, 2)))
         return {"imei": imei, "result": "Fail"}
 
-    except :
+    except IOError:
+        end_cust = time.perf_counter()
+        duration = end_cust - start_cust
+        logger.warning("Element not found!")
+        print("Something went wrong. Stopping device {}...".format(device_serial))
+        logger.debug("[Fail] {} customization ended in {}s"
+            .format(imei, round(duration, 2)))
+        print("[Fail] {} -- {}s".format(imei, round(duration, 2)))
+        return {"imei": imei, "result": "Fail"}
+    
+    except OSError:
+        end_cust = time.perf_counter()
+        duration = end_cust - start_cust
+        logger.warning("Command timed out")
+        print("Something went wrong. Stopping device {}...".format(device_serial))
+        logger.debug("[Fail] {} customization ended in {}s"
+            .format(imei, round(duration, 2)))
+        print("[Fail] {} -- {}s".format(imei, round(duration, 2)))
+        return {"imei": imei, "result": "Fail"}
+
+    except:
         end_cust = time.perf_counter()
         duration = end_cust - start_cust
         print("Something went wrong. Stopping device {}...".format(device_serial))
@@ -90,6 +132,3 @@ def customizeTo(buyer_code, device_serial):
             .format(imei, round(duration, 2)))
         print("[Fail] {} -- {}s".format(imei, round(duration, 2)))
         return {"imei": imei, "result": "Fail"}
-
-
-    # d(textMatches = "OK").click()

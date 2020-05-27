@@ -12,6 +12,7 @@ import customizer
 import threading
 import time
 import sys
+import temp_monitor
 
 
 Logger.set_codename('toast')
@@ -33,24 +34,40 @@ class AndroidAgentDeviceListener(adl.AndroidDeviceListener):
         
         device_list.append(serial_number)
         for device in device_list:
+            time.sleep(2)
             customizerThread = customizationThread(device)
             logger.debug("Setting device {} to {} thread"
                 .format(device, customizerThread.name))
+            logger.debug("Checking if {} thread already exists..."
+                .format(customizerThread.name))
             if customizerThread.checkIfRunning(customizerThread):
+                logger.debug("{} thread already exists. Passing..."
+                .format(customizerThread.name))
                 pass
             else:
-                try:
-                    if results[device]["result"] != "Pass":
-                        logger.debug("Retrying to run device {}..."
-                            .format(device))
-                        customizerThread.start()
-                except:
-                    customizerThread.start()
+                logger.debug("Creating {} thread..."
+                    .format(customizerThread.name))
+                customizerThread.start()
+
+                # A try/catch statement that checks if the device already has a "Passed"
+                # result.
+                # 
+                # try:
+                #     if results[device]["result"] != "Pass":
+                #         logger.debug("Retrying to run device {}..."
+                #             .format(device))
+                #         customizerThread.start()
+                # except:
+                #     logger.debug("Starting {} thread..."
+                #         .format(customizerThread.name))
+                #     customizerThread.start()
             
     def remove_device(self, serial_number, model, os_version):
         try:
             device_list.remove(serial_number)
             runningThreads.remove(serial_number)
+            logger.info("Device {} disconnected"
+                            .format(serial_number))
             # start = time.perf_counter()
             # print('Start: ' + str(start))
         except:
@@ -69,7 +86,6 @@ class customizationThread(threading.Thread):
         results[self.device_serial] = customizer.customizeTo(
             sys.argv[1].upper(), self.device_serial)
         # print(results)
-        
 
     def checkIfRunning(self, newThread):
         if newThread.name in runningThreads: 
@@ -80,9 +96,19 @@ class customizationThread(threading.Thread):
     
 
 if __name__ == "__main__":
+    temp_monitor.start_temperature_check()
     logger.info("Starting to listen for devices...")
     listener = AndroidAgentDeviceListener()
     adm = adm.AndroidDeviceMonitor()
 
     adm.add_listener(listener)
-    adm.start()
+    try:
+        adm.start()
+    except KeyboardInterrupt:
+        print('Exiting...')
+        logger.info('Close command initialized. Script closed.')
+        sys.exit()
+    except:
+        print('Something went wrong')
+        logger.info('Something went wrong. Script closed.')
+        sys.exit()
