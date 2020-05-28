@@ -98,7 +98,6 @@ class customizationThread(threading.Thread):
             return True
         else:
             runningThreads.append(newThread.name)
-            logger.warn("Running threads: {}".format(runningThreads))
     
 
 if __name__ == "__main__":

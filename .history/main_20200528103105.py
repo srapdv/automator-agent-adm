@@ -67,7 +67,7 @@ class AndroidAgentDeviceListener(adl.AndroidDeviceListener):
             device_list.remove(serial_number)
             runningThreads.remove(serial_number)
             logger.info("Device {} disconnected"
-                .format(serial_number))
+                            .format(serial_number))
             # start = time.perf_counter()
             # print('Start: ' + str(start))
         except:
@@ -86,19 +86,13 @@ class customizationThread(threading.Thread):
         results[self.device_serial] = customizer.customizeTo(
             sys.argv[1].upper(), self.device_serial)
         # print(results)
-    
-    # function using _stop function 
-    def stop(self): 
-        self._stop.set() 
 
     def checkIfRunning(self, newThread):
         if newThread.name in runningThreads: 
             logger.debug("Thread {} already up and running.".format(newThread.name))
-            self._stop.set()
             return True
         else:
             runningThreads.append(newThread.name)
-            logger.warn("Running threads: {}".format(runningThreads))
     
 
 if __name__ == "__main__":

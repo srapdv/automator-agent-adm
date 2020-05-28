@@ -94,11 +94,9 @@ class customizationThread(threading.Thread):
     def checkIfRunning(self, newThread):
         if newThread.name in runningThreads: 
             logger.debug("Thread {} already up and running.".format(newThread.name))
-            self._stop.set()
             return True
         else:
             runningThreads.append(newThread.name)
-            logger.warn("Running threads: {}".format(runningThreads))
     
 
 if __name__ == "__main__":
